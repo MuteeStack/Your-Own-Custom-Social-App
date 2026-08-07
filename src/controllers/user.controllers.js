@@ -9,7 +9,7 @@ const regUser = asyncHandler(async (req , res)=> {
     // upload avator on cloudinary , also check if uploaded
     // create user object // because we use object to send data to mongodb -- create an entry in mongodb
     // remove password and refreshtoken from the response 
-    // check for the res
+    // check for the usercreation and the response 
     // return resp
     
 })
