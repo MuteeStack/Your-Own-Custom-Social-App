@@ -22,3 +22,6 @@ const uploadFileInCloudinary = async function(filepath){
         fs.unlinkSync(filepath)
     }
 }
+
+
+export {uploadFileInCloudinary}
