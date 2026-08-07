@@ -53,6 +53,14 @@ const regUser = asyncHandler(async (req , res)=> {
         username: username.toLowerCase(),
         password
     })
+
+    const createdUser = User.findById(user._id).select(
+        "-password -refreshToken"
+    )
+
+    if(!createdUser){
+        throw new ApiError(500 , "Something went wrong while registering the User")
+    }
 })
 
 
