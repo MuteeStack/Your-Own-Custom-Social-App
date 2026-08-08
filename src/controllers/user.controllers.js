@@ -1,7 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {User} from "../models/user.models.js"
-import {ApiError, apiError} from "../utils/apiError.js"
+import {ApiError} from "../utils/apiError.js"
 import {uploadFileInCloudinary} from "../utils/cloudinary.js"
+import {apiResponse} from "../utils/apiResponse.js"
 const regUser = asyncHandler(async (req , res)=> {
 
     // get user detail from frontend
@@ -18,7 +19,7 @@ const regUser = asyncHandler(async (req , res)=> {
     console.log(username , email)
 
     if([username , email , fullname , password].some((fields)=>fields?.trim() === "")){
-        throw new apiError(400 , "All fields are required")
+        throw new ApiError(400 , "All fields are required")
     }
 
     const existedUser = User.findOne({
@@ -53,14 +54,13 @@ const regUser = asyncHandler(async (req , res)=> {
         username: username.toLowerCase(),
         password
     })
-
-    const createdUser = User.findById(user._id).select(
-        "-password -refreshToken"
-    )
+    const createdUser = User.findById(user._id).select("-password -refreshToken")
 
     if(!createdUser){
-        throw new ApiError(500 , "Something went wrong while registering the User")
+        throw new ApiError(500 , "Server Error while registering")
     }
+
+    return res.status(200).json(new apiResponse(200, createdUser , "User created sucessfully"))
 })
 
 
