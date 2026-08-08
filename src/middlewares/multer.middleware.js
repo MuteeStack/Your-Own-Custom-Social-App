@@ -1,10 +1,12 @@
 import multer from "multer"
+import path from "path"
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './Public/Temp')
   },
   filename: function (req, file, cb) { // write filename by which to save in temp folder
-    cb(null, file.filename)
+    cb(null, file.originalname)
   }
 })
 

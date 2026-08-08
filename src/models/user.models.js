@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
-    fullname: {
+    fullName: {
         type: String,
         required: true,
         trim: true,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
         type: String, // cloudinary url
         required: true
     },
-    coverimage: {
+    coverImage: {
         type: String // cloudinary url
     },
     watchHistory : [
@@ -53,10 +53,10 @@ const userSchema = new mongoose.Schema({
 //the normal function
 // we use async await here because encrypting password takes some time 
 
-userSchema.pre("save" , async function(next){
-    if(!this.isModified("password")) return next();
+userSchema.pre("save" , async function(){
+    if(!this.isModified("password")) return ;
         this.password = await bcrypt.hash(this.password , 10)
-        next()
+        
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
@@ -68,7 +68,7 @@ userSchema.methods.generateAccessToken = function(){
     jwt.sign({
         _id : this._id,
         userName: this.userName,
-        fullname: this.fullname,
+        fullName: this.fullName,
         email : this.email
     } ,
     process.env.ACCESS_TOKEN_SECRET

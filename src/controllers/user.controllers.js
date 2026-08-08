@@ -15,24 +15,24 @@ const regUser = asyncHandler(async (req , res)=> {
     // check for the usercreation and the response 
     // return resp
 
-    const {username , email , fullname , password} = req.body
-    console.log(username , email)
+    const {userName , email , fullName , password} = req.body
+    console.log(userName , email)
 
-    if([username , email , fullname , password].some((fields)=>fields?.trim() === "")){
+    if([userName , email , fullName , password].some((fields)=>fields?.trim() === "")){
         throw new ApiError(400 , "All fields are required")
     }
 
-    const existedUser = User.findOne({
-        $or : [{username} , {email}]
+    const existedUser = await User.findOne({
+        $or : [{userName} , {email}]
     })
 
     if(existedUser){
         throw new ApiError(409 , "User already exsisted")
     }
 
-    const avatorLocalPath = req.files?.avator[0]?.path
+    const avatorLocalPath = req.files?.avator?.[0]?.path
 
-    const imageLocalPath = req.files?.Image[0]?.path
+    const imageLocalPath = req.files?.coverImage?.[0]?.path
 
     if(!avatorLocalPath){
         throw new ApiError(400 , "Avator is must required")
@@ -40,21 +40,21 @@ const regUser = asyncHandler(async (req , res)=> {
 
     const avator = await uploadFileInCloudinary(avatorLocalPath)
 
-    const Image = await uploadFileInCloudinary(imageLocalPath)
+    const coverImage = await uploadFileInCloudinary(imageLocalPath)
 
     if(!avator){
         throw new ApiError(400 , "Avator is required")
     }
     
     const user  = await User.create({
-        fullname,
+        fullName,
         avator: avator.url,
-        image: image?.url || "",
+        coverImage: coverImage?.url || "",
         email,
-        username: username.toLowerCase(),
+        userName: userName.toLowerCase(),
         password
     })
-    const createdUser = User.findById(user._id).select("-password -refreshToken")
+    const createdUser = await User.findById(user._id).select("-password -refreshTokens")
 
     if(!createdUser){
         throw new ApiError(500 , "Server Error while registering")
