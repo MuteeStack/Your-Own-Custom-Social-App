@@ -119,7 +119,7 @@ const regUser = asyncHandler(async (req , res) => {
         email, 
         password,
         avator : avator.url ,
-        coverImage: coverImage.url
+        coverImage: coverImage?.url || ""
     })
 
     const User = User.findById(createdUser._id).select(
