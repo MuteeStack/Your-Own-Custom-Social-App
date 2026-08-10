@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {User} from "../models/user.models.js"
-import {apiError} from "../utils/apiError.js"
+import {apiError as ApiError} from "../utils/apiError.js"
 import {uploadFileInCloudinary} from "../utils/cloudinary.js"
 import {apiResponse} from "../utils/apiResponse.js"
 const regUser = asyncHandler(async (req , res)=> {
@@ -16,7 +16,7 @@ const regUser = asyncHandler(async (req , res)=> {
     // return resp
 
     const {userName , email , fullName , password} = req.body
-    console.log(userName , email)
+    console.log(req.body)
 
     if([userName , email , fullName , password].some((fields)=>fields?.trim() === "")){
         throw new ApiError(400 , "All fields are required")
@@ -29,18 +29,23 @@ const regUser = asyncHandler(async (req , res)=> {
     if(existedUser){
         throw new ApiError(409 , "User already exsisted")
     }
-
+    console.log(req.files)
     const avatorLocalPath = req.files?.avator?.[0]?.path
 
-    const imageLocalPath = req.files?.coverImage?.[0]?.path
+    // const imageLocalPath = req.files?.coverImage?.[0]?.path
 
     if(!avatorLocalPath){
         throw new ApiError(400 , "Avator is must required")
     }
 
+    let imageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        imageLocalPath = req.files.coverImage[0].path
+    }
+
     const avator = await uploadFileInCloudinary(avatorLocalPath)
 
-    const coverImage = await uploadFileInCloudinary(imageLocalPath)
+    const coverImage = imageLocalPath ? await uploadFileInCloudinary(imageLocalPath) : null
 
     if(!avator){
         throw new ApiError(400 , "Avator is required")
