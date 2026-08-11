@@ -68,8 +68,17 @@ const regUser = asyncHandler(async (req , res)=> {
     return res.status(200).json(new apiResponse(200, createdUser , "User created sucessfully"))
 })
 
+const loginUser = asyncHandler(async (req , res) => {
+            // get username and email
+            // match username if exsist
+            // if username exsist check password
+            // if password matches then create refresj token and access token
 
-export {regUser}
+            const {userName ,  email } = req.body
+})
+
+
+export {regUser , loginUser}
 
 
 
