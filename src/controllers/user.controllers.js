@@ -8,7 +8,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   const user = await User.findById({userId})
   const accessToken = user.generateAccessToken()
   const refreshToken = user.generateRefreshToken()
-   user.refreshToken = refreshToken
+   user.refreshTokens = refreshToken
   await user.save({validateBeforeSave : false })
   return {accessToken , refreshToken}
 }
@@ -108,6 +108,23 @@ const loginUser = asyncHandler(async (req , res) => {
            }
 
            const {accessToken , refreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+           const loggedInUser = await User.findById(user._id).select("-password -refreshTokens")
+
+
+           // we do this because we don't want the frontend user to have access to cookies he can see our cookies but cannot modifies it
+           const options = {
+                httpOnly: true,
+                secure: true
+           }
+
+           return res
+           .status(200)
+           .cookie("accessToken" , accessToken , options)
+           .cookie("refreshToken" , refreshToken , options)
+           .json(200 ,{
+            user: loggedInUser , accessToken , refreshToken
+           } , "User logged In successfully")
 })
 
 
