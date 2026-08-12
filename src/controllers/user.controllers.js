@@ -5,12 +5,12 @@ import {uploadFileInCloudinary} from "../utils/cloudinary.js"
 import {apiResponse} from "../utils/apiResponse.js"
 
 const generateAccessAndRefreshTokens = async (userId) => {
-  const user = await User.findById({userId})
-  const accessToken = user.generateAccessToken()
-  const refreshToken = user.generateRefreshToken()
-   user.refreshTokens = refreshToken
-  await user.save({validateBeforeSave : false })
-  return {accessToken , refreshToken}
+    const user = await User.findById({userId})
+    const accessToken = user.generateAccessToken()
+    const refreshToken = user.generateRefreshToken()
+    user.refreshTokens = refreshToken
+    await user.save({validateBeforeSave : false })
+    return {accessToken , refreshToken}
 }
 
 
