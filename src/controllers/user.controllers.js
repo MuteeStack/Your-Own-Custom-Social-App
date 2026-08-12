@@ -1,8 +1,20 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {User} from "../models/user.models.js"
-import {apiError as ApiError} from "../utils/apiError.js"
+import {apiError, apiError as ApiError} from "../utils/apiError.js"
 import {uploadFileInCloudinary} from "../utils/cloudinary.js"
 import {apiResponse} from "../utils/apiResponse.js"
+
+const generateAccessAndRefreshTokens = async (userId) => {
+  const user = await User.findById({userId})
+  const accessToken = user.generateAccessToken()
+  const refreshToken = user.generateRefreshToken()
+   user.refreshToken = refreshToken
+  await user.save({validateBeforeSave : false })
+  return {accessToken , refreshToken}
+}
+
+
+
 const regUser = asyncHandler(async (req , res)=> {
 
     // get user detail from frontend
@@ -72,10 +84,32 @@ const loginUser = asyncHandler(async (req , res) => {
             // get username and email
             // match username if exsist
             // if username exsist check password
-            // if password matches then create refresj token and access token
+            // if password matches then create refresh token and access token
+            // send these token using cookies
 
-            const {userName ,  email } = req.body
+            const {userName ,  email , password } = req.body
+
+
+            if(!(userName || email)){
+                throw new apiError(400 , "Username or email is required")
+            }
+          const user = await User.findOne({
+            $or: [{userName} , {email}]
+           })
+
+           if(!user){
+            throw new apiError(404 , "User doesn't exsist")
+           }
+
+           const isPasswordValid = await user.isPasswordCorrect(password)
+
+           if(!isPasswordValid){
+                throw new apiError(404 , "Password is not correct")
+           }
+
+           const {accessToken , refreshToken} = await generateAccessAndRefreshTokens(user._id)
 })
+
 
 
 export {regUser , loginUser}
