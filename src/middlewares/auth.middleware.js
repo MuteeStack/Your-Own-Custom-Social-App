@@ -1,12 +1,31 @@
 import { apiError } from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler";
-
+import jwt from "jsonwebtoken"
+import { User } from "../models/user.models";
 
 export const verfiyJWT = asyncHandler(async (req , res , next) => {   
-     // if anything is not used we write it as _ like in this we are not using res so we write it as _
-     const token = req.cookies?.accessToken || req.header("Autherization")?.replace("Bearer " , "")
+    try {
+         // if anything is not used we write it as _ like in this we are not using res so we write it as _
+         const token = req.cookies?.accessToken || req.header("Autherization")?.replace("Bearer " , "")
+    
+         if(!token){
+            throw new apiError(401 , "Unautherized Request")
+         }
+         const decodedToken = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET)
+    
+    
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
+    
+        if(!user){
+            // Will be discussed in the next video no # 16
+            throw new apiError(401 , "Invalid access Token")
+        }
+    
+        req.user = user
+        next()
+    } catch (error) {
 
-     if(!token){
-        throw new apiError(401 , "Unautherized Request")
-     }
+        throw new apiError(401 , error?.message || "Invalid Access Token")
+        
+    }
 })
