@@ -17,7 +17,7 @@ router.route("/register").post(
         }
     ]),
     regUser)
-router.route("/loggin").post(loginUser)
+router.route("/login").post(loginUser)
 
 router.route("/logout").post(verfiyJWT , logoutUser)
 export default router

@@ -1,21 +1,25 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {User} from "../models/user.models.js"
-import {apiError, apiError as ApiError} from "../utils/apiError.js"
+import {apiError } from "../utils/apiError.js"
 import {uploadFileInCloudinary} from "../utils/cloudinary.js"
 import {apiResponse} from "../utils/apiResponse.js"
 
 const generateAccessAndRefreshTokens = async (userId) => {
-    const user = await User.findById({userId})
-    const accessToken = user.generateAccessToken()
-    const refreshToken = user.generateRefreshToken()
-    user.refreshTokens = refreshToken
-    await user.save({validateBeforeSave : false })
-    return {accessToken , refreshToken}
+try {
+        
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
+        user.refreshTokens = refreshToken
+        await user.save({validateBeforeSave : false })
+        return {accessToken , refreshToken}
+
+} catch (error) {
+    throw new apiError(500 , "There is a problem with server")
+}
 }
 
-
-
-const regUser = asyncHandler(async (req , res)=> {
+const regUser = asyncHandler(async (req , res) => {
 
     // get user detail from frontend
     // validation (like if user send empty username or passowrd )
@@ -122,11 +126,10 @@ const loginUser = asyncHandler(async (req , res) => {
            .status(200)
            .cookie("accessToken" , accessToken , options)
            .cookie("refreshToken" , refreshToken , options)
-           .json(200 ,{
+           .json( new apiResponse(200 ,{
             user: loggedInUser , accessToken , refreshToken
-           } , "User logged In successfully")
+           } , "User logged In successfully"))
 })
-
 
 const logoutUser = asyncHandler(async (req , res) => {
             // clear all cookies
@@ -150,11 +153,9 @@ const logoutUser = asyncHandler(async (req , res) => {
             .json(new apiResponse(
                 200 ,
                 {} ,
-                "User Logout SuccessFully"
+                "User Logout Sucessfully"
             ))
 })
-
-
 
 export {regUser , loginUser , logoutUser}
 
