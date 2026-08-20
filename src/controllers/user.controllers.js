@@ -3,6 +3,7 @@ import {User} from "../models/user.models.js"
 import {apiError } from "../utils/apiError.js"
 import {uploadFileInCloudinary} from "../utils/cloudinary.js"
 import {apiResponse} from "../utils/apiResponse.js"
+import jwt from "jsonwebtoken"
 
 const generateAccessAndRefreshTokens = async (userId) => {
 try {
@@ -155,6 +156,16 @@ const logoutUser = asyncHandler(async (req , res) => {
                 {} ,
                 "User Logout Sucessfully"
             ))
+})
+
+
+const refreshAccessToken = new asyncHandler(async (req , res ) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    if(!incomingRefreshToken) {
+        throw new apiError(400 , "Please try agian")
+    }
+
+    const token = jwt.verify(incomingRefreshToken , process.env.REFRESH_TOKEN_SECRET)
 })
 
 export {regUser , loginUser , logoutUser}
