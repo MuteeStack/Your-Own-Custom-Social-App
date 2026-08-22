@@ -165,7 +165,23 @@ const refreshAccessToken = new asyncHandler(async (req , res ) => {
         throw new apiError(400 , "Please try agian")
     }
 
-    const token = jwt.verify(incomingRefreshToken , process.env.REFRESH_TOKEN_SECRET)
+    const decodedToken = jwt.verify(incomingRefreshToken , process.env.REFRESH_TOKEN_SECRET)
+
+    const user = await User.findById(decodedToken?._id)
+    if(!user) {
+        throw new apiError(400 , "Invalid refresh Token")
+    }
+
+    if(incomingRefreshToken !== user?.refreshToken){
+        throw new apiError(400 , "refresh token is expired or used")
+    }
+
+    await generateAccessAndRefreshTokens(user._id)
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
 })
 
 export {regUser , loginUser , logoutUser}
